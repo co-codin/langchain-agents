@@ -10,16 +10,14 @@ load_dotenv()
 
 chat = ChatOpenAI()
 
-system_prompt = SystemMessage(content="You are a database query assistant.")
-
 tools = [run_sqlite_query]
 
 agent = create_agent(
     model=chat,
     tools=tools,
-    system_prompt=system_prompt,
 )
 
 result = agent.invoke({"messages": [HumanMessage(content="How many users are in the database?")]})
 
+print(result["messages"][1].tool_calls[0]['args'])
 print(result["messages"][-1].content)
