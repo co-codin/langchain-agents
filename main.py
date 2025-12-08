@@ -14,7 +14,10 @@ tables = list_tables()
 tools = [run_sqlite_query, describe_tables]
 
 system_message = SystemMessage(
-    content=f"You are an AI that has access to a SQLite database.\n{tables}"
+    content=f"You are an AI that has access to a SQLite database.\n"
+            f"The database has tables of: {tables}\n"
+            "Do not make any assumptions about what tables exist "
+            "or what columns exist. Instead, use the 'describe_tables' function"
 )
 
 agent = create_agent(

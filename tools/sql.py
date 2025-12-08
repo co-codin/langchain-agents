@@ -1,5 +1,7 @@
 import sqlite3
 from langchain_core.tools import tool
+from pydantic import BaseModel
+from typing import List
 
 def list_tables():
     with sqlite3.connect("db.sqlite") as conn:
@@ -8,7 +10,16 @@ def list_tables():
         rows = c.fetchall()
         return "\n".join(row[0] for row in rows if row[0] is not None)
 
-@tool
+class RunQueryArgsSchema(BaseModel):
+    query: str
+
+
+class DescribeTablesArgsSchema(BaseModel):
+    table_names: List[str]
+
+@tool(
+    args_schema=RunQueryArgsSchema
+)
 def run_sqlite_query(query: str):
     """Run a sqlite query."""
     with sqlite3.connect("db.sqlite") as conn:
@@ -20,7 +31,9 @@ def run_sqlite_query(query: str):
         except sqlite3.OperationalError as err:
             return f"The following error occurred: {str(err)}"
 
-@tool
+@tool(
+    args_schema=DescribeTablesArgsSchema
+)
 def describe_tables(table_names):
     """Given a list of table names, returns the schema of those tables"""
     with sqlite3.connect("db.sqlite") as conn:
