@@ -1,11 +1,29 @@
 import sqlite3
 from langchain_core.tools import tool
 
+def list_tables():
+    with sqlite3.connect("db.sqlite") as conn:
+        c = conn.cursor()
+        c.execute("SELECT name from sqlite_master WHERE type = 'table';")
+        rows = c.fetchall()
+        return "\n".join(row[0] for row in rows if row[0] is not None)
+
 @tool
 def run_sqlite_query(query: str):
     """Run a sqlite query."""
     with sqlite3.connect("db.sqlite") as conn:
         c = conn.cursor()
-        c.execute(query)
-        return c.fetchall()
 
+        try:
+            c.execute(query)
+            return c.fetchall()
+        except sqlite3.OperationalError as err:
+            return f"The following error occurred: {str(err)}"
+
+@tool
+def describe_tables(table_names):
+    """Given a list of table names, returns the schema of those tables"""
+    with sqlite3.connect("db.sqlite") as conn:
+        c = conn.cursor()
+        rows = c.execute(f"SELECT sql FROM sqlite_master WHERE type='table' and name IN ({tables});")
+        return '\n'.join(row[0] for row in rows if row[0] is not None)
