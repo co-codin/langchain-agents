@@ -4,7 +4,7 @@ from langchain_core.tools import tool
 def list_tables():
     with sqlite3.connect("db.sqlite") as conn:
         c = conn.cursor()
-        c.execute("SELECT name from sqlite_master WHERE type = 'table';")
+        c.execute("SELECT name FROM sqlite_master WHERE type='table';")
         rows = c.fetchall()
         return "\n".join(row[0] for row in rows if row[0] is not None)
 
@@ -25,5 +25,6 @@ def describe_tables(table_names):
     """Given a list of table names, returns the schema of those tables"""
     with sqlite3.connect("db.sqlite") as conn:
         c = conn.cursor()
+        tables = ', '.join("'" + table + "'" for table in table_names)
         rows = c.execute(f"SELECT sql FROM sqlite_master WHERE type='table' and name IN ({tables});")
         return '\n'.join(row[0] for row in rows if row[0] is not None)
