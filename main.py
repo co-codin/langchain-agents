@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
-
+from langchain.memory import ConversationBufferMemory
 from tools.report import write_report_tool
 from tools.sql import run_sqlite_query, list_tables, describe_tables
 
@@ -12,6 +12,7 @@ chat = ChatOpenAI(model="gpt-4.1")
 
 tables = list_tables()
 
+memory = ConversationBufferMemor(memory_key="chat_history", return_messages=True)
 tools = [run_sqlite_query, describe_tables, write_report_tool]
 
 system_message = SystemMessage(
@@ -24,7 +25,9 @@ system_message = SystemMessage(
 agent = create_agent(
     model=chat,
     tools=tools,
+    memoryview=memory
 )
+
 
 result = agent.invoke({"messages": [HumanMessage(content="Summarize the top 5 most popular products. Write the results to a report file")]})
 
